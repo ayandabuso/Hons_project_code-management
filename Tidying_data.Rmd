@@ -1,0 +1,98 @@
+---
+title: "Tidying_data"
+author: "ayandabuso"
+date: "2025-02-20"
+output: html_document
+---
+#Introduction 
+In this document we will tidy the insect data which is a mock data for my honours project.
+#loading data
+This data is already in my working directiory which i just saved directly to after creating it.Fistly, we load necessary libraries to read in data.
+
+```{r}
+#loading necessary libraries
+library(tidyverse)
+#we need to also add package to read an excel file
+# Read the CSV file
+insect_data <- read_csv("insects_data.csv")
+# Check the first few rows
+head(insect_data)
+
+```
+Now we are going to check our data and look for missing values
+
+```{r}
+
+# check for missing values
+sum(is.na(insect_data))
+```
+I would like my data to to use proper colomn names for easier understanding of what they mean.
+
+```{r}
+# Convert data types
+insect_data <- insect_data %>%
+  mutate(
+    pitfall_id = as.factor(pitfall_id),
+    site_name = as.factor(site),
+    collection_date = as.Date(date),
+    insect_taxa = as.factor(taxa),
+    count = as.numeric(count)  # Ensure count is numeric
+  )
+
+# Check structure
+glimpse(insect_data)
+```
+We are interested in knowing the total abundance of each insect group recorded in the"taxa" colomn which is iportant in addressing the question, the code below answeres that.
+
+```{r}
+taxa_abundance <- insect_data %>%
+  group_by(insect_taxa) %>%
+  summarise(total_abundance = sum(count, na.rm = TRUE)) %>%
+  arrange(desc(total_abundance))
+
+# View summarized table
+print(taxa_abundance)
+```
+lets visualise these abundance data!
+```{r}
+#first we need to load ggplot2 for this visualization.
+library(ggplot2)
+# Create a bar plot of insect abundance
+ggplot(taxa_abundance, aes(x = reorder(insect_taxa, -total_abundance), y = total_abundance, fill = insect_taxa)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Total Abundance of Each Insect Taxa",
+       x = "Insect Taxa",
+       y = "Total Count") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  coord_flip()
+```
+beatiful!
+Now that we have gotten some knowledge about the abundance of the insect groups for example noting that the ants are most abundant and the flies are the least, but this barplot also helps us easily answer the second question of interest which is the diversity! we can tell that there are six different groups of insects found; flies,grasshoppers, bettles, thrips,butterflies and ants.
+
+we can compare diversity between sites:
+
+```{r}
+# Calculate diversity by counting unique taxa per site
+site_diversity <- insect_data %>%
+  group_by(site_name) %>%
+  summarise(diversity = n_distinct(insect_taxa)) %>%
+  arrange(desc(diversity))
+
+# View results
+print(site_diversity)
+```
+
+The overall diversity:
+```{r}
+# Calculate the total number of unique insect taxa across all sites
+overall_diversity <- insect_data %>%
+  summarise(total_unique_taxa = n_distinct(insect_taxa))
+
+# Print result
+print(overall_diversity)
+```
+
+```{r}
+insect_data
+```
