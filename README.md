@@ -30,3 +30,4 @@ The data used here are Mock data obtained from an imaginary reserve called Sly n
 -species richness: calculating the number of taxa groups and compareb between sites.
 
 -visualization: looking at the overall abundance and species richness and comparing between sites
+https://mybinder.org/v2/gh/ayandabuso/Hons_project_code-management/HEAD
